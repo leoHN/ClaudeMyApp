@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { okrService } from '../services/okrService'
 import { companyService } from '../services/companyService'
-import { DashboardStats, Quarter, Company } from '../types'
+import type { DashboardStats, Quarter, Company } from '../types'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Target, TrendingUp, Award, Building } from 'lucide-react'
 
@@ -51,7 +51,7 @@ export const DashboardPage: React.FC = () => {
         quarterId: selectedQuarter,
         companyId: selectedCompany,
       })
-      setStats(statsData)
+      setStats(statsData || null)
     } catch (error) {
       console.error('Error loading stats:', error)
     }

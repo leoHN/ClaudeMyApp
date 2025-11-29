@@ -1,5 +1,5 @@
 import api from './api'
-import { Objective, KeyResult, Approval, DashboardStats, ApiResponse } from '../types'
+import type { Objective, KeyResult, Approval, DashboardStats, ApiResponse } from '../types'
 
 export const okrService = {
   // Objectives

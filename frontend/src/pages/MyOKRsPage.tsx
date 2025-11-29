@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { okrService } from '../services/okrService'
 import { useAuth } from '../contexts/AuthContext'
-import { Objective, KeyResult } from '../types'
+import type { Objective } from '../types'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'

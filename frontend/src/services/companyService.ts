@@ -1,5 +1,5 @@
 import api from './api'
-import { Company, Department, Quarter, ApiResponse } from '../types'
+import type { Company, Department, Quarter, ApiResponse } from '../types'
 
 export const companyService = {
   // Companies

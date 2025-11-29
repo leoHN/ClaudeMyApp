@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { okrService } from '../services/okrService'
-import { Approval } from '../types'
+import type { Approval } from '../types'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'

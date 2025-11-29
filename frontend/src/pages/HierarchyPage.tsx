@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { okrService } from '../services/okrService'
 import { companyService } from '../services/companyService'
-import { Objective, Quarter, Company } from '../types'
+import type { Objective, Quarter, Company } from '../types'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { calculateProgress, getProgressColor } from '../lib/utils'
