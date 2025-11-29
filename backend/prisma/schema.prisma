@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  DEPARTMENT_HEAD
+  EMPLOYEE
+}
+
+enum OKRLevel {
+  COMPANY
+  DEPARTMENT
+  EMPLOYEE
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  // OKRs assigned to this user
+  objectives         Objective[]
+
+  // OKRs created/assigned by this user
+  assignedObjectives Objective[] @relation("AssignedBy")
+
+  // Progress updates made by this user
+  progressUpdates    ProgressUpdate[]
+
+  // Approvals made by this user
+  approvals          Approval[]
+
+  @@map("users")
+}
+
+model Company {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  departments Department[]
+  objectives  Objective[]
+
+  @@map("companies")
+}
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  users      User[]
+  objectives Objective[]
+
+  @@map("departments")
+}
+
+model Quarter {
+  id        String   @id @default(uuid())
+  name      String   // e.g., "Q1 2024"
+  year      Int
+  quarter   Int      // 1, 2, 3, or 4
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  objectives Objective[]
+
+  @@unique([year, quarter])
+  @@map("quarters")
+}
+
+model Objective {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  level       OKRLevel
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  quarterId String
+  quarter   Quarter @relation(fields: [quarterId], references: [id])
+
+  // Owner relations based on level
+  companyId    String?
+  company      Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  departmentId String?
+  department   Department?  @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  userId       String?
+  user         User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Parent objective (for cascading OKRs)
+  parentId String?
+  parent   Objective?  @relation("ObjectiveHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Objective[] @relation("ObjectiveHierarchy")
+
+  // Assigned by
+  assignedById String?
+  assignedBy   User?   @relation("AssignedBy", fields: [assignedById], references: [id])
+
+  // Key Results
+  keyResults KeyResult[]
+
+  @@map("objectives")
+}
+
+model KeyResult {
+  id             String   @id @default(uuid())
+  title          String
+  description    String?
+  target         Float    // Target value
+  unit           String   // e.g., "%", "件", "người"
+  currentValue   Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  objectiveId String
+  objective   Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+
+  progressUpdates ProgressUpdate[]
+  approvals       Approval[]
+
+  @@map("key_results")
+}
+
+model ProgressUpdate {
+  id        String   @id @default(uuid())
+  value     Float
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  keyResultId String
+  keyResult   KeyResult @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  approval Approval?
+
+  @@map("progress_updates")
+}
+
+model Approval {
+  id        String         @id @default(uuid())
+  status    ApprovalStatus @default(PENDING)
+  comment   String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  // Relations
+  progressUpdateId String         @unique
+  progressUpdate   ProgressUpdate @relation(fields: [progressUpdateId], references: [id], onDelete: Cascade)
+
+  keyResultId String
+  keyResult   KeyResult @relation(fields: [keyResultId], references: [id], onDelete: Cascade)
+
+  approverId String?
+  approver   User?   @relation(fields: [approverId], references: [id])
+
+  @@map("approvals")
+}
